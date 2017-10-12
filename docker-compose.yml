@@ -1,0 +1,35 @@
+version: '2'
+services:
+  users:
+    build: ./users
+    image: smart-chat/users
+    container_name: smart-chat-users
+    depends_on:
+      - mongo
+    links:
+      - mongo
+    environment:
+      VIRTUAL_HOST: users.local
+
+  web:
+    build: ./web
+    image: smart-chat/web
+    container_name: smart-chat-web
+    depends_on:
+      - mongo
+      - users
+    links:
+      - mongo
+    environment:
+      VIRTUAL_HOST: web.local
+
+  mongo:
+    command: mongod
+    image: mongo:3.4
+    container_name: smart-chat-mongodb
+    ports:
+      - "27100:27017" # map port to none standard port to avoid conflicts
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    logging:
+      driver: none
