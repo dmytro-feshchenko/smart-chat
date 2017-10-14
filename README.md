@@ -6,8 +6,8 @@ Overview
 The backend is powered by 4 microservices, all of witch happen to be written in
 Go as RESTful APIs.
 
- * Channels Service: Provides information about existing channels.
- * Messages Service: Provides communicating information.
+ * Channels Service: Provides information about existing channels. [Not yet]
+ * Messages Service: Provides communicating information. [Not yet]
  * Users Service: Provides messages for users by communicating with other services.
  * Web Service: Represents web interface for customer.
 
@@ -31,5 +31,9 @@ Written in Node.js + GraphQL (using Apollo Server).
 Services
 ========
 1. Users Service: uses Golang with GraphQL to provide endpoint to work with users data. All the data stored into PostgreSQL database.
+Responsibilities:
+* Authentication
+* Managing accounts
+* Restore password
 2. Web Service: represents React + Redux + Apollo Client to provide web
 interface for customers.

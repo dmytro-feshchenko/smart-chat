@@ -25,10 +25,11 @@ services:
     image: smart-chat/web
     container_name: smart-chat-web
     depends_on:
-      - mongo
-      - users
+      - api_gateway
     links:
-      - mongo
+      - api_gateway
+    ports:
+      - "5050:5000"
     environment:
       VIRTUAL_HOST: web.local
 
