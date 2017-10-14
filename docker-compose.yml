@@ -1,5 +1,14 @@
 version: '2'
 services:
+  api_gateway:
+    build: ./api_gateway
+    image: smart-chat/api_gateway
+    container_name: smart-chat-api-gateway
+    ports:
+        - "3030:3000"
+    environment:
+      PORT: 3000
+
   users:
     build: ./users
     image: smart-chat/users
@@ -33,3 +42,14 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     logging:
       driver: none
+
+  postgres:
+    image: postgres
+    container_name: smart-chat-postgresql
+    restart: always
+
+  redis:
+    image: redis:4.0.2
+    container_name: smart-chat-redis
+    ports:
+        - "6379"

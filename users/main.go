@@ -7,14 +7,8 @@ import (
 	"net/http"
 
 	"github.com/graphql-go/graphql"
+	models "github.com/technoboom/smart-chat/users/models"
 )
-
-// User - user account model
-type User struct {
-	ID    string `json:"id"`
-	Name  string `json:"name"`
-	Email string `json:"email"`
-}
 
 // userType - GraphQL ObjectType which represents user account
 var userType = graphql.NewObject(graphql.ObjectConfig{
@@ -51,7 +45,7 @@ var rootMutation = graphql.NewObject(graphql.ObjectConfig{
 				name, _ := params.Args["name"].(string)
 				email, _ := params.Args["email"].(string)
 
-				newAccount := User{
+				newAccount := models.User{
 					Name:  name,
 					Email: email,
 				}
@@ -79,7 +73,7 @@ var rootQuery = graphql.NewObject(graphql.ObjectConfig{
 					// todo: find and return user info
 				}
 
-				return User{}, nil
+				return models.User{}, nil
 			},
 		},
 		"usersList": &graphql.Field{
