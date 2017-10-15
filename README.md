@@ -1,4 +1,4 @@
-# Smart Chat - Realtime chat built with Go, Node.js, Docker and GraphQL
+# Smart Chat - Realtime chat built with Go, Node.js, Docker, React and GraphQL
 
 Overview
 ========
@@ -27,7 +27,6 @@ Proxy API Gateway
 =================
 Written in Node.js + GraphQL (using Apollo Server).
 
-
 Services
 ========
 1. Users Service: uses Golang with GraphQL to provide endpoint to work with users data. All the data stored into PostgreSQL database.
@@ -37,3 +36,13 @@ Responsibilities:
 * Restore password
 2. Web Service: represents React + Redux + Apollo Client to provide web
 interface for customers.
+3. Messages Service: stores all data about communication between customers. Provides
+a RESTful API to give an access to this information.
+4. Channels Service: stores all data about public channels. Provides REST API.
+Responsibilities:
+* Search public channels
+* Join to some public/private channel
+
+Web Interface
+=============
+Built with create-react-app and Apollo Client.

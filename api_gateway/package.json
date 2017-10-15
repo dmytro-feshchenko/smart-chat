@@ -1,7 +1,7 @@
 {
   "name": "api_gateway",
   "version": "0.0.1",
-  "description": "GraphQL Api Gateway for Smart Chat Application",
+  "description": "GraphQL API Gateway for Smart Chat Application",
   "main": "server.js",
   "license": "MIT",
   "scripts": {

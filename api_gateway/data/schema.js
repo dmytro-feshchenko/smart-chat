@@ -5,8 +5,12 @@ import {
 import mocks from './mocks';
 
 const typeDefs = `
+type Channel{
+  id: ID!
+  name: String
+}
 type Query{
-  testString: String
+  channels: [Channel]
 }
 `;
 

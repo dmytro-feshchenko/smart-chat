@@ -4,12 +4,13 @@
   "private": true,
   "dependencies": {
     "react": "^16.0.0",
+    "react-apollo": "^1.4.16",
     "react-dom": "^16.0.0",
     "react-scripts": "1.0.14"
   },
   "optionalDependencies": {
-  "fsevents": "*"
-},
+    "fsevents": "*"
+  },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",

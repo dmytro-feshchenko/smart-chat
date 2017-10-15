@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Added
 - Proxy API Gateway
+- Apollo Server to Proxy API Gateway
 - Users microservice
 - Web microservice
+- Apollo Client to web service
 - MongoDB image
 - PostgreSQL image
