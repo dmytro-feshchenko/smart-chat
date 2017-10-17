@@ -1,16 +1,13 @@
 package main
 
-import (
-	"fmt"
-
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/postgres"
-)
+import "os"
 
 func main() {
-	db, err := gorm.Open("postgres", "host=localhost user=gorm dbname=channels sslmode=disable password=mypassword")
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-	defer db.Close()
+	a := App{}
+	a.Initialize(
+		os.Getenv("APP_DB_USERNAME"),
+		os.Getenv("APP_DB_PASSWORD"),
+		os.Getenv("APP_DB_NAME"),
+	)
+	a.Run(":8080")
 }

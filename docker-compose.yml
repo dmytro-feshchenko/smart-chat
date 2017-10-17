@@ -20,6 +20,19 @@ services:
     ports:
         - "5554:8080"
 
+  channels:
+    build: ./channels
+    image: smart-chat/channels
+    container_name: smart-chat-channels
+    ports:
+      - "6464:6465"
+    depends_on:
+      - postgres
+    environment:
+      APP_DB_USERNAME: "root"
+      APP_DB_PASSWORD: "root"
+      APP_DB_NAME: "channels"
+
   web:
     build: ./web
     image: smart-chat/web
