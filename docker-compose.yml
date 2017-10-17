@@ -17,8 +17,8 @@ services:
       - mongo
     links:
       - mongo
-    environment:
-      VIRTUAL_HOST: users.local
+    ports:
+        - "5554:8080"
 
   web:
     build: ./web
@@ -48,6 +48,8 @@ services:
     image: postgres
     container_name: smart-chat-postgresql
     restart: always
+    ports:
+      - "8001:5432"
 
   redis:
     image: redis:4.0.2

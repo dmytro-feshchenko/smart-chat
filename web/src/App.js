@@ -1,5 +1,10 @@
 import React, { Component } from 'react';
 import {
+  BrowserRouter as Router,
+  Route,
+  Link
+} from 'react-router-dom'
+import {
   ApolloClient,
   gql,
   graphql,
@@ -9,6 +14,7 @@ import {
 import logo from './logo.svg';
 import './App.css';
 import ChannelsListWithData from './ChannelsList';
+import Chat from './Chat';
 
 const client = new ApolloClient({
   networkInterface: createNetworkInterface({
@@ -17,6 +23,9 @@ const client = new ApolloClient({
 });
 
 class App extends Component {
+  constructor(props) {
+    super(props);
+  }
   render() {
     return (
       <ApolloProvider client={client}>
@@ -25,7 +34,11 @@ class App extends Component {
             <img src={logo} className="App-logo" alt="logo" />
             <h1 className="App-title">Welcome to Smart Chat</h1>
           </header>
-          <ChannelsListWithData />
+
+          <Router>
+            <Route exact path="/" component={ChannelsListWithData} />
+            <Route path="/channels/:id" component={Chat} />
+          </Router>
         </div>
       </ApolloProvider>
     );

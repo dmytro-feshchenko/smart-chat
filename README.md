@@ -14,6 +14,20 @@ Go as RESTful APIs.
 We also have Proxy API Gateway written in Node.js + GraphQL to create one endpoint
 to communicate with microservices.
 
+Prerequisites
+=============
+Pull the repository: `git clone https://github.com/technoboom/smart-chat`.
+
+Generate RSA signing files via shell for users service (you can adjust this
+  as you want):
+```
+$ cd users
+$ openssl genrsa -out app.rsa 1024
+$ openssl rsa -in app.rsa -pubout > app.rsa.pub
+```
+
+This files used for JWT authentication.
+
 Commands
 ========
 Starting services: `docker-compose up --build` or

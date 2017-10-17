@@ -1,114 +1,120 @@
 package main
 
 import (
+	"crypto/rsa"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"log"
+	"strings"
+	"time"
 
 	"net/http"
 
-	"github.com/graphql-go/graphql"
+	"github.com/dgrijalva/jwt-go"
 	models "github.com/technoboom/smart-chat/users/models"
 )
 
-// userType - GraphQL ObjectType which represents user account
-var userType = graphql.NewObject(graphql.ObjectConfig{
-	Name: "User",
-	Fields: graphql.Fields{
-		"id": &graphql.Field{
-			Type: graphql.String,
-		},
-		"name": &graphql.Field{
-			Type: graphql.String,
-		},
-		"email": &graphql.Field{
-			Type: graphql.String,
-		},
-	},
-})
+// private and public RSA key paths
+const (
+	privKeyPath = "app.rsa"
+	pubKeyPath  = "app.rsa.pub"
+)
 
-// rootMutation - root mutation
-var rootMutation = graphql.NewObject(graphql.ObjectConfig{
-	Name: "RootMutation",
-	Fields: graphql.Fields{
-		"registerAccount": &graphql.Field{
-			Type:        userType,
-			Description: "register a new account",
-			Args: graphql.FieldConfigArgument{
-				"name": &graphql.ArgumentConfig{
-					Type: graphql.NewNonNull(graphql.String),
-				},
-				"email": &graphql.ArgumentConfig{
-					Type: graphql.NewNonNull(graphql.String),
-				},
-			},
-			Resolve: func(params graphql.ResolveParams) (interface{}, error) {
-				name, _ := params.Args["name"].(string)
-				email, _ := params.Args["email"].(string)
+var (
+	verifyKey *rsa.PublicKey
+	signKey   *rsa.PrivateKey
+)
 
-				newAccount := models.User{
-					Name:  name,
-					Email: email,
-				}
-
-				return newAccount, nil
-			},
-		},
-	},
-})
-
-var rootQuery = graphql.NewObject(graphql.ObjectConfig{
-	Name: "RootQuery",
-	Fields: graphql.Fields{
-		"user": &graphql.Field{
-			Type:        userType,
-			Description: "Get single user details",
-			Args: graphql.FieldConfigArgument{
-				"id": &graphql.ArgumentConfig{
-					Type: graphql.String,
-				},
-			},
-			Resolve: func(params graphql.ResolveParams) (interface{}, error) {
-				_, isOk := params.Args["id"].(string)
-				if isOk {
-					// todo: find and return user info
-				}
-
-				return models.User{}, nil
-			},
-		},
-		"usersList": &graphql.Field{
-			Type:        graphql.NewList(userType),
-			Description: "Get list of users",
-			Resolve: func(params graphql.ResolveParams) (interface{}, error) {
-				return nil, nil
-			},
-		},
-	},
-})
-
-// define schema, with our rootQuery and rootMutation
-var schema, _ = graphql.NewSchema(graphql.SchemaConfig{
-	Query:    rootQuery,
-	Mutation: rootMutation,
-})
-
-func executeQuery(query string, schema graphql.Schema) *graphql.Result {
-	result := graphql.Do(graphql.Params{
-		Schema:        schema,
-		RequestString: query,
-	})
-	if len(result.Errors) > 0 {
-		fmt.Printf("wrong result, unexpected errors: %v", result.Errors)
+// fatal - checks error object and generates fatal log in case of error
+func fatal(err error) {
+	if err != nil {
+		log.Fatal(err)
 	}
-	return result
+}
+
+// initKeys - reads keys from file system, generates fatal logs in case of error
+func initKeys() {
+	signBytes, err := ioutil.ReadFile(privKeyPath)
+	fatal(err)
+
+	signKey, err = jwt.ParseRSAPrivateKeyFromPEM(signBytes)
+	fatal(err)
+
+	verifyBytes, err := ioutil.ReadFile(pubKeyPath)
+	fatal(err)
+
+	verifyKey, err = jwt.ParseRSAPublicKeyFromPEM(verifyBytes)
+	fatal(err)
+}
+
+// Response - represents server response data model
+type Response struct {
+	Data string `json:"data"`
+}
+
+// LoginHandler - provides an ability to login user and generate JWT token in
+// case of success. Otherwise, generates error message.
+func LoginHandler(w http.ResponseWriter, r *http.Request) {
+	var user models.UserCredentials
+
+	err := json.NewDecoder(r.Body).Decode(&user)
+
+	if err != nil {
+		w.WriteHeader(http.StatusForbidden)
+		fmt.Println(w, "Error in request")
+		return
+	}
+
+	if strings.ToLower(user.Username) != "someone" && user.Password != "p@ssword" {
+		w.WriteHeader(http.StatusForbidden)
+		fmt.Println("Error logging in")
+		fmt.Fprint(w, "Invalid credentials")
+		return
+	}
+
+	token := jwt.New(jwt.SigningMethodRS256)
+	claims := make(jwt.MapClaims)
+	claims["exp"] = time.Now().Add(time.Hour * time.Duration(1)).Unix()
+	claims["iat"] = time.Now().Unix()
+	token.Claims = claims
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintln(w, "Error extracting the key")
+		fatal(err)
+	}
+
+	tokenString, err := token.SignedString(signKey)
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintln(w, "Error while signing the token")
+		fatal(err)
+	}
+
+	response := models.Token{Token: tokenString}
+	JSONResponse(response, w)
+}
+
+// JSONResponse - writes response as application/json in http.ResponseWriter
+func JSONResponse(response interface{}, w http.ResponseWriter) {
+	json, err := json.Marshal(response)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(json)
 }
 
 // Entry point for the program
 func main() {
-	http.HandleFunc("/graphql", func(w http.ResponseWriter, r *http.Request) {
-		result := executeQuery(r.URL.Query().Get("query"), schema)
-		json.NewEncoder(w).Encode(result)
-	})
+	initKeys()
+
+	http.HandleFunc("/login", LoginHandler)
 
 	http.ListenAndServe(":8080", nil)
 }
