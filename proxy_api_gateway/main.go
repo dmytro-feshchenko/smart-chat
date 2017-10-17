@@ -3,12 +3,34 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"math/rand"
+	"time"
 
 	"net/http"
 
 	"github.com/graphql-go/graphql"
 	types "github.com/technoboom/smart-chat/proxy_api_gateway/types"
 )
+
+type (
+	// Message - contains data about single chat message
+	Message struct {
+		ID   int    `json:"id"`
+		Text string `json:"text"`
+	}
+)
+
+var MessageList []Message
+
+func init() {
+	message1 := Message{ID: 1, Text: "Message 1"}
+	message2 := Message{ID: 2, Text: "Message 2"}
+	message3 := Message{ID: 3, Text: "Message 3"}
+
+	MessageList = append(MessageList, message1, message2, message3)
+
+	rand.Seed(time.Now().UnixNano())
+}
 
 // rootMutation - root mutation
 var rootMutation = graphql.NewObject(graphql.ObjectConfig{
@@ -78,6 +100,13 @@ var rootQuery = graphql.NewObject(graphql.ObjectConfig{
 			Resolve: func(params graphql.ResolveParams) (interface{}, error) {
 				data, _ := http.NewRequest("GET", "localhost:6464/channels", nil)
 				return data, nil
+			},
+		},
+		"messages": &graphql.Field{
+			Type:        graphql.NewList(types.MessageType),
+			Description: "Get messages list",
+			Resolve: func(params graphql.ResolveParams) (interface{}, error) {
+				return MessageList, nil
 			},
 		},
 	},

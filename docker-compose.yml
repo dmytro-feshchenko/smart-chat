@@ -1,11 +1,11 @@
 version: '2'
 services:
-  api_gateway:
-    build: ./api_gateway
-    image: smart-chat/api_gateway
-    container_name: smart-chat-api-gateway
+  proxy_api_gateway:
+    build: ./proxy_api_gateway
+    image: smart-chat/proxy_api_gateway
+    container_name: smart-chat-proxy-api-gateway
     ports:
-        - "3030:3000"
+        - "3030:8080"
     environment:
       PORT: 3000
 
@@ -38,9 +38,9 @@ services:
     image: smart-chat/web
     container_name: smart-chat-web
     depends_on:
-      - api_gateway
+      - proxy_api_gateway
     links:
-      - api_gateway
+      - proxy_api_gateway
     ports:
       - "5000:5000"
     environment:
